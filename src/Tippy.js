@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import tippy from 'tippy.js'
 
 // These props are not native to `tippy.js` and are specific to React only.
-const REACT_ONLY_PROPS = ['children', 'onCreate', 'isVisible', 'isEnabled']
+const REACT_ONLY_PROPS = ['reference', 'children', 'onCreate', 'isVisible', 'isEnabled']
 
 // Avoid Babel's large '_objectWithoutProperties' helper function.
 function getNativeTippyProps(props) {
@@ -16,6 +16,12 @@ function getNativeTippyProps(props) {
   }, {})
 }
 
+function checkReferenceObjectProp (props, propName, componentName) {
+  if (!props.reference && !props.children) {
+    return new Error(`One of props 'reference' or 'children' is required in '${componentName}'.`);
+  }
+}
+
 class Tippy extends React.Component {
   state = { isMounted: false }
 
@@ -24,7 +30,8 @@ class Tippy extends React.Component {
   static propTypes = {
     content: PropTypes.oneOfType([PropTypes.string, PropTypes.element])
       .isRequired,
-    children: PropTypes.element.isRequired,
+    reference: checkReferenceObjectProp,
+    children: checkReferenceObjectProp,
     onCreate: PropTypes.func,
     isVisible: PropTypes.bool,
     isEnabled: PropTypes.bool
@@ -48,7 +55,10 @@ class Tippy extends React.Component {
   componentDidMount() {
     this.setState({ isMounted: true })
 
-    this.tip = tippy.one(ReactDOM.findDOMNode(this), this.options)
+    this.tip = tippy.one(
+      this.props.reference ? document.querySelector(this.props.reference) : ReactDOM.findDOMNode(this), 
+      this.options,
+    )
 
     const { onCreate, isEnabled, isVisible } = this.props
 

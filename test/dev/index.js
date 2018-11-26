@@ -147,6 +147,9 @@ class App extends React.Component {
         <Tippy>
           <ComponentChild />
         </Tippy>
+        <Tippy reference='#root'>
+          <button>Custom reference</button>
+        </Tippy>
       </main>
     )
   }
